@@ -90,10 +90,54 @@ public class MainActivity extends AppCompatActivity {
                 toDialog=new Dialog(MainActivity.this);
                 toDialog.setContentView(R.layout.to_spinner);
                 toDialog.getWindow().setLayout(650,800);
+                toDialog.show();
 
+                EditText editText=toDialog.findViewById(R.id.edit_text);
+                ListView listView=toDialog.findViewById(R.id.list_view);
 
+                ArrayAdapter<String> adapter=new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1,arrayList);
+                listView.setAdapter(adapter);
 
+                editText.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        adapter.getFilter().filter(s);
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+
+                    }
+                });
+                listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        convertToDropDownTextView.setText(adapter.getItem(position));
+                        toDialog.dismiss();
+                        convertToValue=adapter.getItem(position);
+                    }
+                });
             }
         });
+        convertButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    Double amountToConvert=Double.valueOf(MainActivity.this.amountToConvert.getText().toString());
+                    getConversionRate(convertFromValue,convertToValue,amountToConvert);
+                }
+                catch (Exception e) {
+
+                }
+            }
+        });
+    }
+    public String getConversionRate(String convertFrom,String convertTo,Double amountToConvert){
+        return conversionValue;
     }
 }
