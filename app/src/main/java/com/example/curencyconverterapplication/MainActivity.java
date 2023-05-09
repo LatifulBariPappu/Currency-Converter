@@ -3,6 +3,7 @@ package com.example.curencyconverterapplication;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Dialog;
+//import android.icu.math.BigDecimal;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -14,7 +15,16 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.lang.reflect.Array;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.math.*;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     Dialog toDialog;
     Button convertButton;
     String convertFromValue, convertToValue, conversionValue;
-    String[] country = {};
+    String[] country = {"AFN","EUR","ALL","DZD","USD","AOA","XCD","ARS","AMD","AWG","AUD","AZN","BSD","BHD","BDT","BBD","BYN","BZO","BZO","XOF","BMD","INR","BTN"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,6 +148,36 @@ public class MainActivity extends AppCompatActivity {
         });
     }
     public String getConversionRate(String convertFrom,String convertTo,Double amountToConvert){
-        return conversionValue;
+        RequestQueue queue= Volley.newRequestQueue(this);
+        String url="https://free.currconv.com/api/v7/convert?q="+convertFrom+"_"+convertTo+"&compact=ultra&apikey=22e91ab924eb2aa6f9a4";
+        StringRequest stringRequest=new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                JSONObject jsonObject = null;
+                try {
+                    jsonObject = new JSONObject(response);
+                    double conversionRateValue = round(((Double) jsonObject.get(convertFrom + "_" + convertTo)), 2);
+                    conversionValue = "" + round((conversionRateValue * amountToConvert), 2);
+                    conversionRateText.setText(conversionValue);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        queue.add(stringRequest);
+        return null;
+    }
+    public static double round(double value,int places){
+        if(places<0) throw new IllegalArgumentException();
+        BigDecimal bd=BigDecimal.valueOf(value);
+        bd=bd.setScale(places,RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 }
